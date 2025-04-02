@@ -101,7 +101,7 @@
                 console.log(res.data.data,'111111111111111111111111111111111111');
                 const users = res.data.data;
                 const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = '<h2>Users Found:</h2><ul>' + users.map(users => `<li>`).join('');
+                resultDiv.innerHTML = '<h2>Users Found:</h2><ul>' + users.map(user => `<li>${user.name}</li>`).join('');
             })
             .catch(function(err){
                 console.log(err)
@@ -138,7 +138,7 @@
                     const users = res.data.data;
                     const asyncGetResultDiv = document.getElementById('asyncGetResult');
                     asyncGetResultDiv.innerHTML = '<h2>Users Found:</h2>' + users.map(users =>
-                        `<li>${users.name}<li>`).join('');
+                        `<li>${users.name}</li>`).join('');
                 }
             } catch (err){
                 console.log(err)
