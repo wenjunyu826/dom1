@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -87,6 +88,7 @@
         .search-input::placeholder {
             color: #9ca3af;
         }
+
         .search-history {
             position: absolute;
             width: 100%;
@@ -219,6 +221,7 @@
         table td:nth-child(5) {
             width: 100px;
         }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -226,36 +229,37 @@
                 margin: 0;
                 border-radius: 0;
             }
-            
+
             body {
                 padding: 0;
             }
-            
+
             h1 {
                 font-size: 24px;
             }
-            
+
             .search-input {
                 padding: 12px 15px;
             }
-            
-            th, td {
+
+            th,
+            td {
                 padding: 10px 8px;
                 font-size: 14px;
             }
         }
-
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>人员信息搜索系统</h1>
-        
+
         <div class="search-box">
             <input type="text" class="search-input" id="searchInput" placeholder="请输入姓名或学号后四位/全部学号...">
             <div class="search-history" id="searchHistory"></div>
         </div>
-        
+
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -270,9 +274,14 @@
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        
+
         <div id="noResults" class="no-results">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px; color: #9ca3af;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                style="margin-bottom: 10px; color: #9ca3af;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
             <div>没有找到匹配的结果</div>
         </div>
     </div>
@@ -334,20 +343,20 @@
         const tableBody = document.getElementById('tableBody');
         const noResults = document.getElementById('noResults');
 
-        function debounce(func,delay){
+        function debounce(func, delay) {
             let timer;
-            return function(){
+            return function () {
                 clearTimeout(timer);
                 timer = setTimeout(() => {
-                    func.apply(this,arguments);
-                },delay);
+                    func.apply(this, arguments);
+                }, delay);
             }
         }
 
         function initTable(data) {
             tableBody.innerHTML = '';
 
-            if (data.length === 0){
+            if (data.length === 0) {
                 noResults.style.display = 'flex';
                 noResults.style.flexDirection = 'column';
                 noResults.style.alignItems = 'center';
@@ -366,34 +375,118 @@
                 tableBody.appendChild(row);
             })
         }
-        function searchData(keyword){
-            if(!keyword){
+        function searchData(keyword) {
+            if (!keyword) {
                 initTable(dataList);
                 return;
             }
             const filteredData = dataList.filter(item => {
                 const isNumeric = /^\d+$/.test(keyword);
-                if (isNumeric){
-                    if(keyword.length === 4){
+                if (isNumeric) {
+                    if (keyword.length === 4) {
                         return item.id.endsWith(keyword);
-                    } else if (keyword.length === 10){
+                    } else if (keyword.length === 10) {
                         return item.id === keyword;
                     }
                     return false;
-                } else{
+                } else {
                     return item.name.toLowerCase().includes(keyword.toLowerCase());
                 }
             })
             initTable(filteredData);
         }
 
-        searchInput.addEventListener('input',debounce(function(){
+        function addToHistory(keyword) {
+            historyList = historyList.filter(item => item !== keyword);
+            historyList.unshift(keyword);
+
+            if (historyList.length > 1) {
+                historyList = historyList.slice(0, 5);
+            }
+            localStorage.setItem('searchHistory', JSON.stringify(historyList));
+
+            renderHistory();
+        }
+
+        function renderHistory() {
+            searchHistory.innerHTML = '';
+            historyList.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = "history-item";
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = item;
+                textSpan.style.flexGrow = "1";
+                textSpan.style.cursor = "pointer";
+
+                historyItem.addEventListener('click', function (event) {
+                    if (!event.target.classList.contains("delete-history")) {
+                        searchInput.value = item;
+                        searchHistory.style.display = "none";
+                        searchData(item);
+                    }
+                })
+                const deleteBtn = document.createElement('span');
+                deleteBtn.className = 'delete-history';
+                deleteBtn.innerHTML = 'X';
+                deleteBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    deleteHistory(item);
+                });
+                historyItem.appendChild(textSpan);
+                historyItem.appendChild(deleteBtn);
+                searchHistory.appendChild(historyItem);
+            });
+        }
+
+        function deleteHistory(keyword) {
+            historyList = historyList.filter(item => item !== keyword);
+            localStorage.setItem('searchHistory', JSON.stringify(historyList));
+            renderHistory();
+            if (historyList.length === 0) {
+                searchHistory.style.display = 'none';
+            }
+        }
+
+        searchInput.addEventListener('keyup', function (e) {
+            if (e.key === 'Enter') {
+                const keyword = this.value.trim();
+                if (keyword) {
+                    addToHistory(keyword);
+                }
+            }
+        })
+
+        searchInput.addEventListener('blur', function () {
+            const keyword = this.value.trim();
+            if (keyword) {
+                addToHistory(keyword);
+            }
+        })
+
+        searchInput.addEventListener('focus', function () {
+            if (historyList.length > 0) {
+                renderHistory();
+                searchHistory.style.display = 'block';
+            }
+        })
+
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !searchHistory.contains(e.target)) {
+                searchHistory.style.display = 'none';
+            }
+        })
+
+        let historyList = JSON.parse(localStorage.getItem('searchHistory')) || [];
+
+        searchInput.addEventListener('input', debounce(function () {
             const keyword = searchInput.value.trim();
             searchData(keyword);
         }))
         initTable(dataList);
     </script>
-    
-    
+
+
 </body>
+
 </html>
