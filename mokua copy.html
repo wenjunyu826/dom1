@@ -31,12 +31,21 @@
     <script type="module">
         import {add,subtract,PI} from './js/math1.js';
 
-        import sayHello, {sayGoodbye} from './js/greetingResult';
+        import sayHello, {sayGoodbye} from './js/greeting1.js';
+
+        const mathResult = document.getElementById('mathResult');
+        mathResult.innerHTML = `<h3>数学运算结果</h3>
+        <p>5+3= ${add(5,3)}</p>
+        <p>5-3= ${subtract(5,3)}</p>
+        <p>圆周率= ${PI}</p>
+        `;
+
+        const greetingResult = document.getElementById('greetingResult');
         greetingResult.innerHTML =`
         <h3>问候结果</h3>
         <p>${sayHello('小明')}</p>
         <p>${sayGoodbye('小6')}</p>
-        `
+        `;
     </script>
 
 </body>
