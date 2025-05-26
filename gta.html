@@ -25,22 +25,40 @@
             background: url("./img/QQ图片20250526150037.png") no-repeat center/cover;
             background-clip: text;
             color: transparent;
-            animation-name: scale;
-            animation-duration: 6s;
-            animation-iteration-count: infinite;
-            animation-direction: alternate;
+            transition: font-size 0.3s ease;
         }
-        @keyframes scale{
-            from{
-                font-size: 12vw;
-            }
-            to {
-                font-size: 390vw;
-            }
-        }
+        
     </style>
 </head>
 <body>
-    <h1>AHIHT</h1>
+    <h1 id="title">AHIHT</h1>
+    <script>
+        const title = document.getElementById('title');
+        let currentSize = 12;
+        const minSize = 5;
+        const maxSize = 390;
+        function getStep(size){
+            if(size < 20) return 2;
+            if(size < 50) return 5;
+            if(size < 100) return 10;
+            if(size < 200) return 20;
+            if(size < 300) return 30;
+            return 100;
+        }
+
+        window.addEventListener("wheel",function(e){
+            e.preventDefault();
+
+            const step = getStep(currentSize);
+
+            if(e.deltaY < 0){
+                currentSize = Math.min(currentSize + step, maxSize);
+            } else {
+                currentSize = Math.max(currentSize - step,minSize)
+            }
+
+            title.style.fontSize = currentSize + 'vw';
+        })
+    </script>
 </body>
 </html>
